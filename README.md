@@ -2,9 +2,11 @@
 
 LLM Agent와 LLM Wiki 패턴을 직접 구현해보는 학습 레포.
 
+```
 side-project/
 ├── agent-learning/      # Tool Calling · MCP · ReAct Agent 구현 (Python)
 └── llm-wiki-practice/   # LLM Wiki 실습 키트 (Transformer 어텐션 주제)
+```
 
 ---
 
