@@ -5,11 +5,12 @@
 ## 폴더 구성
 ```
 llm-wiki-practice/
-├── raw/        # 📄 원본 자료 (LLM이 수정하지 않음)
-├── wiki/       # 🧠 LLM이 채워갈 빈 폴더
-├── schema.md   # 📋 위키 운영 규칙
-├── README.md   # 이 문서
-└── ANSWER_KEY.md  # 🔒 실습 후에 열어보세요 (스포일러)
+├── raw/                  # 📄 원본 자료 (LLM이 수정하지 않음)
+├── wiki/                 # 🧠 LLM이 채워갈 빈 폴더
+├── schema.md             # 📋 위키 운영 규칙
+├── README.md             # 이 문서
+├── llm-wiki-report.html  # 📊 완료된 실습의 샘플 평가 리포트
+└── ANSWER_KEY.md         # 🔒 실습 후에 열어보세요 (스포일러)
 ```
 
 ## 준비물
@@ -34,7 +35,12 @@ llm-wiki-practice/
 ### Step 4. 점검(lint)하기
 > wiki/ 전체를 검토해서 서로 모순되는 내용, 출처가 없는 주장, 연결이 빠진 페이지를 찾아줘.
 
-### Step 5. 답 맞춰보기
+### Step 5. 리포트 작성 (선택)
+> 위 내용을 바탕으로 llm wiki 실습 진행을 평가해주는 리포트를 작성해줘. 강점, 놓친 것, 충돌 발생 현황 등을 담아줘.
+
+샘플 출력: [`llm-wiki-report.html`](llm-wiki-report.html)
+
+### Step 6. 답 맞춰보기
 `ANSWER_KEY.md`를 열어 LLM이 함정을 잡아냈는지 확인하세요.
 
 ## 관찰 포인트
