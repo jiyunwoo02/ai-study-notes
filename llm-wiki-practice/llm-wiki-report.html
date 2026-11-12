@@ -1,0 +1,581 @@
+<title>LLM Wiki 실습 평가 리포트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap">
+
+<style>
+  /* Layout: single-column report, max 760px, structured sections */
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --fg: #1a1d23;
+    --fg-muted: #5a6072;
+    --border: #e2e5ec;
+    --accent: #2a7d8c;
+    --accent-soft: #e8f4f6;
+    --good: #1e7a4a;
+    --good-soft: #e6f4ed;
+    --warn: #9a5c00;
+    --warn-soft: #fff4e0;
+    --danger: #b03030;
+    --danger-soft: #fce8e8;
+    --tag-bg: #eef0f5;
+    --tag-fg: #3d4559;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12141a;
+      --surface: #1c1f28;
+      --fg: #e8eaf0;
+      --fg-muted: #8891a8;
+      --border: #2c3042;
+      --accent: #3fa8bb;
+      --accent-soft: #172630;
+      --good: #3dba73;
+      --good-soft: #0e2b1c;
+      --warn: #d4860a;
+      --warn-soft: #2a1f05;
+      --danger: #e05555;
+      --danger-soft: #2b0f0f;
+      --tag-bg: #252934;
+      --tag-fg: #adb5cc;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12141a;
+    --surface: #1c1f28;
+    --fg: #e8eaf0;
+    --fg-muted: #8891a8;
+    --border: #2c3042;
+    --accent: #3fa8bb;
+    --accent-soft: #172630;
+    --good: #3dba73;
+    --good-soft: #0e2b1c;
+    --warn: #d4860a;
+    --warn-soft: #2a1f05;
+    --danger: #e05555;
+    --danger-soft: #2b0f0f;
+    --tag-bg: #252934;
+    --tag-fg: #adb5cc;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 48px;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* Header */
+  .report-header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+  }
+  .report-eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .report-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--fg);
+    text-wrap: balance;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .report-meta {
+    font-size: 13px;
+    color: var(--fg-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .report-meta span { display: flex; align-items: center; gap: 5px; }
+
+  /* Score bar */
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 520px) { .score-card { grid-template-columns: 1fr; } }
+  .score-item { display: flex; flex-direction: column; gap: 6px; }
+  .score-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .score-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .score-desc { font-size: 12px; color: var(--fg-muted); }
+  .score-bar-wrap {
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .score-bar { height: 100%; border-radius: 99px; background: var(--accent); }
+
+  /* Section */
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 18px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-good  { background: var(--good-soft);   color: var(--good); }
+  .icon-warn  { background: var(--warn-soft);   color: var(--warn); }
+  .icon-danger{ background: var(--danger-soft); color: var(--danger); }
+  .icon-info  { background: var(--accent-soft); color: var(--accent); }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .section-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Item rows */
+  .item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .item-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .item-desc { font-size: 13px; color: var(--fg-muted); }
+
+  /* Conflict card */
+  .conflict-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .conflict-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 14px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    border-bottom: 1px solid var(--border);
+  }
+  .conflict-rows { display: flex; flex-direction: column; }
+  .conflict-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  @media (max-width: 480px) { .conflict-row { grid-template-columns: 1fr; } }
+  .conflict-cell {
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--border);
+  }
+  .conflict-cell:first-child { border-right: 1px solid var(--border); }
+  .conflict-cell:last-child { border-right: none; }
+  .conflict-cell strong { display: block; font-size: 11px; color: var(--fg-muted); margin-bottom: 3px; font-family: 'Space Grotesk', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+  .cell-high { background: var(--good-soft); }
+  .cell-low  { background: var(--danger-soft); }
+  .conflict-note {
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    background: var(--tag-bg);
+  }
+
+  /* Lint table */
+  .lint-table { width: 100%; border-collapse: collapse; min-width: 0; font-size: 13px; }
+  .lint-table th {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .lint-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--fg-muted); }
+  .lint-table td:first-child { color: var(--fg); font-family: 'Space Grotesk', sans-serif; font-size: 12px; }
+  .lint-table tr:last-child td { border-bottom: none; }
+  .table-wrap { overflow-x: auto; }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--tag-fg);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .tag-good   { background: var(--good-soft);   color: var(--good); }
+  .tag-warn   { background: var(--warn-soft);   color: var(--warn); }
+  .tag-danger { background: var(--danger-soft); color: var(--danger); }
+
+  /* Callout */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .callout-good   { background: var(--good-soft);   color: var(--good); }
+  .callout-warn   { background: var(--warn-soft);   color: var(--warn); }
+  .callout-info   { background: var(--accent-soft); color: var(--accent); }
+  .callout-icon   { flex-shrink: 0; font-size: 15px; line-height: 1.6; }
+  .callout-text   { color: var(--fg); }
+  .callout-text strong { color: inherit; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); }
+
+  /* Summary row */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) { .summary-grid { grid-template-columns: 1fr; } }
+  .summary-cell {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .summary-cell-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .summary-cell-val {
+    font-size: 13px;
+    color: var(--fg);
+  }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11.5px;
+    background: var(--tag-bg);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  ul { padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+  li { font-size: 13px; color: var(--fg-muted); }
+  li strong { color: var(--fg); }
+</style>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="report-header">
+    <p class="report-eyebrow">실습 평가 리포트</p>
+    <h1 class="report-title">LLM Wiki 실습 — Transformer 어텐션과 효율화</h1>
+    <div class="report-meta">
+      <span>📅 2026-11-12</span>
+      <span>📄 raw 파일 5개 ingest 완료</span>
+      <span>📑 개념 페이지 13개 · 소스 페이지 5개</span>
+    </div>
+  </header>
+
+  <!-- Score summary -->
+  <div class="score-card">
+    <div class="score-item">
+      <span class="score-label">Schema 준수율</span>
+      <span class="score-value">95<span style="font-size:16px;color:var(--fg-muted)">%</span></span>
+      <div class="score-bar-wrap"><div class="score-bar" style="width:95%"></div></div>
+      <span class="score-desc">출처 표시·한국어·raw 미수정 모두 충족</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">충돌 탐지</span>
+      <span class="score-value">2<span style="font-size:16px;color:var(--fg-muted)">/2</span></span>
+      <div class="score-bar-wrap"><div class="score-bar" style="width:100%"></div></div>
+      <span class="score-desc">발생한 충돌 모두 ⚠️ 섹션으로 표시</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Lint 이슈</span>
+      <span class="score-value">3<span style="font-size:16px;color:var(--fg-muted)">건</span></span>
+      <div class="score-bar-wrap"><div class="score-bar" style="width:30%;background:var(--warn)"></div></div>
+      <span class="score-desc">깨진 링크 1 · 고아 페이지 1 · 출처 미흡 1</span>
+    </div>
+  </div>
+
+  <!-- 강점 -->
+  <section>
+    <div class="section-header">
+      <div class="section-icon icon-good">✓</div>
+      <span class="section-title">강점 — 잘 지킨 것들</span>
+    </div>
+    <div class="section-body">
+
+      <div class="item">
+        <span class="item-title">모든 주장에 출처 표시 <span class="tag tag-good">Schema 핵심</span></span>
+        <span class="item-desc">18개 페이지 전체에서 사실 주장마다 <code>(출처: 파일명.md)</code> 형식을 일관되게 유지했다. 출처 없이 단정 짓는 문장이 단 한 건에 그쳤다(multi-head-attention.md 64차원 계산값).</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <span class="item-title">기존 페이지를 갱신하는 ingest 패턴 준수 <span class="tag tag-good">관찰 포인트 통과</span></span>
+        <span class="item-desc">02·03번 ingest 시 <code>self-attention.md</code>가 새로 만들어지지 않고 기존 페이지에 병합됐다. Schema의 핵심 관찰 포인트를 올바르게 수행했다. 각 ingest마다 frontmatter의 <code>sources</code> 목록도 함께 확장해 추적 가능성을 유지했다.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <span class="item-title">충돌 발생 시 임의 판정 없이 ⚠️ 섹션으로 명시 <span class="tag tag-good">Schema 핵심</span></span>
+        <span class="item-desc">05번 회의록이 기존 위키와 충돌하는 두 지점(Transformer 발표 연도, FlashAttention 특성)을 모두 탐지하고, 어느 쪽이 맞는지 판정하지 않은 채 출처와 신뢰도를 함께 제시했다. 미검증 구두 발언과 논문 스터디 노트를 신뢰도 차원에서 명확히 구별한 점도 돋보인다.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <span class="item-title">모르는 내용은 "자료에 없음"으로 명시</span>
+        <span class="item-desc">MQA와 GQA는 04번 자료에서 키워드만 등장하고 상세 내용이 없었는데, 추측하거나 채워 넣지 않고 "자료에 없음. 키워드만 언급됨"이라고 명확히 적었다. 05번의 GQA 액션 아이템("지은이 조사 예정")까지 연결해 미완료 지식임을 표시했다.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <span class="item-title">개념 간 양방향 링크 연결</span>
+        <span class="item-desc"><code>[[페이지명]]</code> 링크를 통해 sparse-attention ↔ self-attention, flashattention ↔ tiling ↔ recomputation, kv-cache ↔ mqa ↔ gqa 등 개념 그래프가 체계적으로 형성됐다. 한 방향만 링크하는 단방향 고아 관계가 거의 없다.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <span class="item-title">log.md · index.md 매 ingest마다 갱신</span>
+        <span class="item-desc">5번의 ingest 모두에서 ingest 이력(날짜, 파일명, 생성·갱신 목록)을 log.md에 기록하고 index.md의 목차를 최신 상태로 유지했다.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="item">
+        <span class="item-title">05번 자료의 출처 신뢰도를 메타데이터로 표현</span>
+        <span class="item-desc">회의록이라는 출처 유형("구두 발언·미검증")을 소스 요약 페이지 상단에 경고로 명시하고, 충돌 표에서 신뢰도 열을 추가해 독자가 판단 근거를 확인할 수 있게 했다.</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 충돌 발생 현황 -->
+  <section>
+    <div class="section-header">
+      <div class="section-icon icon-warn">⚠</div>
+      <span class="section-title">충돌 발생 현황 — 2건</span>
+    </div>
+    <div class="section-body">
+
+      <div class="conflict-card">
+        <div class="conflict-title">충돌 1 — Transformer 발표 연도 · concepts/transformer.md</div>
+        <div class="conflict-rows">
+          <div class="conflict-row">
+            <div class="conflict-cell cell-high">
+              <strong>신뢰도 높음</strong>
+              01-attention-is-all-you-need-notes.md (논문 스터디 노트)<br>
+              → <b>2017년</b> Google 연구진 발표
+            </div>
+            <div class="conflict-cell cell-low">
+              <strong>신뢰도 낮음</strong>
+              05-study-group-meeting-notes.md (미검증 구두 발언)<br>
+              → <b>2018년</b> Google 발표
+            </div>
+          </div>
+        </div>
+        <div class="conflict-note">판정 보류 상태. 05번 자료의 출처 신뢰도가 명시적으로 낮아 사실상 01번이 우세하나, 위키 규칙상 임의 판정하지 않음.</div>
+      </div>
+
+      <div class="conflict-card">
+        <div class="conflict-title">충돌 2 — FlashAttention 근사 여부 및 복잡도 · concepts/flashattention.md</div>
+        <div class="conflict-rows">
+          <div class="conflict-row">
+            <div class="conflict-cell cell-high">
+              <strong>신뢰도 높음</strong>
+              03-flashattention-notes.md (논문 스터디 노트)<br>
+              → <b>Exact(정확)</b> 어텐션, 연산량 <b>O(n²)</b> 유지, 개선 대상은 메모리 접근 비용
+            </div>
+            <div class="conflict-cell cell-low">
+              <strong>신뢰도 낮음</strong>
+              05-study-group-meeting-notes.md (참석자 구두 발언)<br>
+              → <b>근사</b> 어텐션, 계산량 <b>O(n)</b>으로 감소 주장
+            </div>
+          </div>
+        </div>
+        <div class="conflict-note">발언자 본인도 불확실하다고 했고 "논문 재확인"을 액션 아이템으로 남긴 상태. 판정 보류 중.</div>
+      </div>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <span class="callout-text">두 충돌 모두 05번 회의록의 미검증 발언에서 비롯됐다. 실습 설계 의도대로 "출처 유형에 따른 신뢰도 차이"가 충돌 처리 과정에서 명확히 드러났다.</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 놓친 것 / 미흡한 점 -->
+  <section>
+    <div class="section-header">
+      <div class="section-icon icon-warn">△</div>
+      <span class="section-title">미흡한 점 — Lint에서 발견된 3건</span>
+    </div>
+    <div class="section-body">
+
+      <div class="table-wrap">
+        <table class="lint-table">
+          <thead>
+            <tr>
+              <th>종류</th>
+              <th>위치</th>
+              <th>내용</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-warn">출처 미흡</span></td>
+              <td><code>concepts/multi-head-attention.md</code></td>
+              <td>"각 헤드는 512/8=64 차원을 담당"이라는 계산값이 원본에는 없는 추론이지만 원본 출처로 인용됨. 명시적으로 "계산값" 또는 "(도출)" 표기가 필요했다.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-danger">깨진 링크</span></td>
+              <td><code>sources/03-flashattention-notes.md</code></td>
+              <td><code>[[hbm-sram|HBM]]</code> 링크가 있으나 대응하는 <code>concepts/hbm-sram.md</code> 페이지가 생성되지 않았다. tiling.md, flashattention.md에서는 HBM을 일반 텍스트로만 언급해 일관성도 없다.</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-warn">고아 페이지</span></td>
+              <td><code>concepts/transformer.md</code></td>
+              <td>index.md에서만 도달 가능하고, self-attention·multi-head-attention·positional-encoding 등 Transformer를 직접 언급하는 개념 페이지 어디에서도 <code>[[transformer]]</code> 링크가 없다. 개념 그래프에서 고립되어 있다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">△</span>
+        <span class="callout-text"><strong>공통 패턴:</strong> 세 이슈 모두 "페이지를 만들었지만 그래프에 연결하지 않았거나, 링크를 걸었지만 페이지를 만들지 않은" 연결 불일치에서 비롯됐다. 각 ingest 직후 역방향 링크를 점검하는 습관으로 대부분 예방 가능하다.</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 05번 ingest 특이사항 -->
+  <section>
+    <div class="section-header">
+      <div class="section-icon icon-info">★</div>
+      <span class="section-title">05번 ingest 특이사항 — 가장 어려운 케이스</span>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--fg-muted)">05번은 "검증 안 된 구두 발언" 출처로, 실습 전체에서 가장 까다로운 케이스였다. 아래 항목들을 올바르게 처리했다.</p>
+      <ul>
+        <li><strong>출처 신뢰도 차별화</strong> — 소스 요약 상단에 "구두 발언·미검증" 경고를 명시하고 충돌 표에 신뢰도 열을 추가했다.</li>
+        <li><strong>충돌 2건 모두 탐지</strong> — 발표 연도와 FlashAttention 특성 충돌을 각각 해당 개념 페이지에 ⚠️ 섹션으로 표시했다.</li>
+        <li><strong>일치하는 KV Cache 내용은 보강</strong> — 충돌 없는 내용(KV Cache 메모리 병목)은 kv-cache.md에 "스터디 그룹 확인 사항"으로 추가했다.</li>
+        <li><strong>액션 아이템을 미완료 지식과 연결</strong> — "GQA 자료 조사" 액션 아이템을 기존 gqa.md의 "자료에 없음" 상태와 연결했다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 종합 평가 -->
+  <section>
+    <div class="section-header">
+      <div class="section-icon icon-info">◎</div>
+      <span class="section-title">종합 평가</span>
+    </div>
+    <div class="section-body">
+      <div class="summary-grid">
+        <div class="summary-cell">
+          <span class="summary-cell-label">Schema 준수</span>
+          <span class="summary-cell-val">출처 표시, 한국어, raw 미수정, 페이지 형식(frontmatter + 링크) 모두 충족.</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-cell-label">지식 누적 패턴</span>
+          <span class="summary-cell-val">ingest 순서마다 기존 페이지를 갱신하며 개념이 연결·심화되는 패턴을 올바르게 수행했다.</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-cell-label">충돌 처리</span>
+          <span class="summary-cell-val">발생한 2건 모두 탐지·표시, 임의 판정 없이 양측 근거를 병기했다.</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-cell-label">그래프 완전성</span>
+          <span class="summary-cell-val">고아 페이지 1건·깨진 링크 1건. 연결 일관성 점검이 아쉬운 부분.</span>
+        </div>
+      </div>
+
+      <div class="callout callout-good">
+        <span class="callout-icon">✓</span>
+        <span class="callout-text"><strong>총평:</strong> LLM Wiki 패턴의 핵심인 "출처 기반 지식 누적"과 "충돌 표시 (임의 판정 금지)"를 충실히 수행했다. 발견된 Lint 이슈는 모두 경미한 연결 누락이며, 내용의 사실 왜곡이나 출처 없는 주장은 사실상 발생하지 않았다. 다음 실습에서는 각 ingest 직후 역방향 링크와 고아 페이지 여부를 한 번씩 점검하는 루틴을 추가하면 완성도가 높아질 것이다.</span>
+      </div>
+    </div>
+  </section>
+
+</div>
